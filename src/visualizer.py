@@ -1,55 +1,47 @@
-import pygame
-import sys
-import random
-import algorithms
-
+import pygame, sys, algorithms
+from render import Render
+from state import Array
+        
 # config
-SCREEN_SIZE = 50
-SCALE = 10
+SIZE = 100
+SCALE = 5
 FPS = 60
 
 # init 
 pygame.init()
 pygame.display.set_caption("sorting visualization")
-screen = pygame.display.set_mode((SCREEN_SIZE * SCALE, SCREEN_SIZE * SCALE))
+screen = pygame.display.set_mode((SIZE * SCALE, SIZE * SCALE))
 clock = pygame.time.Clock()
 
+# geramos nosso array e embaralhamos ele
+array = Array(SIZE)
+array.shuffle()
+
+# geramos o render e desenhamos o array todo
+render = Render(screen, SCALE, SIZE)
+render.draw_full(array.values)
+
+# sort vai armazenar nossa funcao geradora
+sort = algorithms.bubble_sort(array.values)
+
 running = True
-
-def generate_array(size):
-    arr = list(range(1, size + 1))
-
-    for i in range(size - 1, 0, -1):
-        j = random.randint(0, i)
-        arr[i], arr[j] = arr[j], arr[i]
-
-    return arr
-
-arr = generate_array(SCREEN_SIZE)
-sort = algorithms.bubble_sort(arr)
-
 while running:   
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
             
     try:
-        screen.fill((0,0,0))
+        i, j = next(sort) # indices que foram trocados
         
-        for x, num in enumerate(next(sort)):
-            pygame.draw.rect(
-                screen, (255,255,255), (
-                    x * SCALE, 
-                    SCREEN_SIZE * SCALE - num * SCALE, 
-                    SCALE, 
-                    num * SCALE
-                    )
-            )
-
+        array.swap(i, j)
+        render.update_bars(array.values, i, j) # atualiza apenas as barras trocadas
+        
         pygame.display.flip()
         clock.tick(FPS)
         
     except StopIteration: # a funcao nao tem mais nenhum yield para retornar
-        pygame.time.wait(5000)
-        pygame.quit()
-        sys.exit()
+        pygame.time.wait(2000)
+        running = False
+        
+pygame.quit()
+sys.exit()
