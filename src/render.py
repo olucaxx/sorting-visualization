@@ -12,15 +12,15 @@ class Render:
         '''
         self.screen.fill((0,0,0))
         for x, v in enumerate(arr):
-            self.draw_bar(x, v)
+            self.draw_bar(x, v, (255,255,255))
 
-    def draw_bar(self, x, value):
+    def draw_bar(self, x, value, color):
         '''
         desenha apenas uma barra branca na tela
         '''
         pygame.draw.rect(
             self.screen,
-            (255,255,255),
+            color,
             (
                 x * self.scale,
                 self.height * self.scale - value * self.scale,
@@ -39,10 +39,12 @@ class Render:
             (x*self.scale, 0, self.scale, self.height*self.scale)
         )
 
-    def update_bars(self, arr, i, j):
+    def update_bars(self, arr, pos, op):
         '''
         encapsula a atualizacao de barras, apagar + desenhar
         '''
-        for idx in (i, j):
-            self.clear_bar(idx)
-            self.draw_bar(idx, arr[idx])
+        if op == "swap" or op == "shift":
+            for x in pos:
+                self.clear_bar(x)
+                self.draw_bar(x, arr[x], (255,255,255))
+        

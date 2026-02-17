@@ -23,7 +23,7 @@ render = Render(screen, SCALE, SIZE)
 render.draw_full(array.values)
 
 # sort vai armazenar nossa funcao geradora
-sort = algorithms.bubble_sort(array.values)
+sort = algorithms.insertion_sort(array.values)
 
 timer = 0
 running = True
@@ -38,10 +38,10 @@ while running:
     
     while timer >= STEP:
         try:
-            i, j = next(sort) # indices que foram trocados
+            position, operation = next(sort) # indices e a operacao que foi realizada
             
-            array.swap(i, j)
-            render.update_bars(array.values, i, j) # atualiza apenas as barras trocadas
+            array.operate(position, operation)
+            render.update_bars(array.values, position, operation) # atualiza apenas as barras afetadas
             
             pygame.display.flip()
             
