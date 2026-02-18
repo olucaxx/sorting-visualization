@@ -5,6 +5,8 @@ class Render:
         self.screen = screen 
         self.scale = scale 
         self.height = height 
+        
+        self.last_changes = set() 
 
     def draw_full(self, arr):
         '''
@@ -38,13 +40,30 @@ class Render:
             (0,0,0),
             (x*self.scale, 0, self.scale, self.height*self.scale)
         )
-
-    def update_bars(self, arr, pos, op):
-        '''
-        encapsula a atualizacao de barras, apagar + desenhar
-        '''
-        if op == "swap" or op == "shift":
-            for x in pos:
-                self.clear_bar(x)
-                self.draw_bar(x, arr[x], (255,255,255))
         
+    def redraw_bar(self, x, value, color):
+        '''
+        encapsula a atualizacao de barras: apagar + desenhar
+        '''
+        self.clear_bar(x)
+        self.draw_bar(x, value, color)
+
+    def update_bars(self, arr, positions, operation):
+        '''
+        logica para desenhar as operacoes realizadas no array
+        '''
+        if self.last_changes:
+            for x in self.last_changes:
+                self.redraw_bar(x, arr[x], (255,255,255))
+            
+        self.last_changes.clear()
+        
+        if operation == "compare":
+            for c in positions:
+                self.redraw_bar(c, arr[c], (255,255,0))
+                self.last_changes.add(c)
+        
+        if operation == "swap" or operation == "shift":
+            for s in positions:
+                self.redraw_bar(s, arr[s], (255,0,0))
+                self.last_changes.add(s)

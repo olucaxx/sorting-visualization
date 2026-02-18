@@ -3,7 +3,7 @@ cada altoritmo vai retornar apenas os indices que devem ser trocados no array
 
 por padrao, cade yield deve retornar:
     um set com os indices que foram afetados 
-    uma string com a operacao: "swap" | "shift"
+    uma string com a operacao: "swap" | "shift" | "compare"
 '''
 
 def bubble_sort(arr):
@@ -36,5 +36,20 @@ def insertion_sort(arr):
             j-=1 # vamos diminuindo ate achar um numero menor, ou chegarmos em -1
             
         arr[j+1] = current # coloamos o atual na frente de onde achamos um numero menor que ele
+
+
+def selection_sort(arr):
+    arr = arr.copy()
+    size = len(arr)
+    
+    for i in range(size - 1): # vamos percorrer ate o penultimo, o ultimo fica ordenado
+        pivot = i # assumimos que o menor elemento eh o i
         
-        
+        for j in range(i + 1, size): # vamos percorrer de i + 1 ate o fim
+            yield (j, pivot), "compare"
+            if arr[j] < arr[pivot]: # se o valor de j for menor, temos um novo menor
+                pivot = j
+                
+        if i != pivot: # verifica se o menor ja esta no lugar certo, ou seja, i
+            arr[i], arr[pivot] = arr[pivot], arr[i] # realizamos a troca
+            yield (i, pivot), "swap"

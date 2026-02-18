@@ -3,10 +3,10 @@ from render import Render
 from state import Array
         
 # config
-SIZE = 100
-SCALE = 5
+SIZE = 128
+SCALE = 4
 FPS = 60
-STEP = 1/100
+STEP = 1/200
 
 # init 
 pygame.init()
@@ -23,7 +23,7 @@ render = Render(screen, SCALE, SIZE)
 render.draw_full(array.values)
 
 # sort vai armazenar nossa funcao geradora
-sort = algorithms.insertion_sort(array.values)
+sort = algorithms.selection_sort(array.values)
 
 timer = 0
 running = True
