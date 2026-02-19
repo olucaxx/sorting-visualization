@@ -1,6 +1,7 @@
 import pygame, sys, algorithms
 from render import Render
 from state import Array
+from runner import AlgorithmRunner
         
 # config
 SIZE = 128
@@ -22,8 +23,7 @@ array.shuffle()
 render = Render(screen, SCALE, SIZE)
 render.draw_full(array.values)
 
-# sort vai armazenar nossa funcao geradora
-sort = algorithms.selection_sort(array.values)
+runner = AlgorithmRunner(algorithms.quick_sort(array.values))
 
 timer = 0
 running = True
@@ -36,19 +36,21 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     
-    while timer >= STEP:
-        try:
-            position, operation = next(sort) # indices e a operacao que foi realizada
-            
-            array.operate(position, operation)
-            render.update_bars(array.values, position, operation) # atualiza apenas as barras afetadas
-            
-            pygame.display.flip()
-            
-        except StopIteration: # a funcao nao tem mais nenhum yield para retornar
-            running = False
+    while timer >= STEP and not runner.finished:
+        result = runner.step()
         
+        if result is not None:
+            position, event = result
+            
+            array.operate(position, event)
+            render.update_bars(array.values, position, event) # atualiza apenas as barras afetadas
+            
         timer -= STEP
         
+    if runner.finished: 
+        render.update_bars(array.values, [], None) # vamos limpar o ultimo evento
+        
+    pygame.display.flip()
+    
 pygame.quit()
 sys.exit()
