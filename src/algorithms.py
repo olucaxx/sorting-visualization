@@ -1,9 +1,9 @@
 '''
 cada altoritmo vai retornar apenas os indices que devem ser trocados no array
 
-por padrao, cade yield deve retornar:
-    um set com os indices que foram afetados 
-    uma string com a operacao: "swap" | "shift" | "compare"
+por padrao, cade yield deve ser: "yield (<indices>,) <evento>"
+    indices = um set com os indices que foram afetados 
+    evento = uma string com a operacao/evento: "swap" | "shift" | "compare" | "pivot" | "ordered"
 '''
 
 def bubble_sort(arr):
@@ -53,3 +53,36 @@ def selection_sort(arr):
         if i != pivot: # verifica se o menor ja esta no lugar certo, ou seja, i
             arr[i], arr[pivot] = arr[pivot], arr[i] # realizamos a troca
             yield (i, pivot), "swap"
+
+
+def quick_sort(arr):
+    arr = arr.copy()
+    
+    def partition(arr, start, end):
+        pivot = arr[end] # ultimo elemento como pivo
+        i = start - 1 # temos que comecar sempre 1 atras
+        yield (end,), "pivot"
+        
+        for j in range(start, end):
+            yield (j, end), "compare"
+            if arr[j] < pivot: # trocamos caso seja menor
+                i += 1
+                arr[i], arr[j] = arr[j], arr[i]
+                yield (i, j), "swap"
+                
+        # precisamos colocar o pivo na sua pos correta, que eh 1 na frente do i
+        arr[i + 1], arr[end] = arr[end], arr[i + 1]
+        yield (i + 1, end), "swap"
+        
+        return i + 1 # retornamos a pos do pivo
+            
+    def sort(arr, start, end):
+        if start < end: # se for igual é False, ou seja, tem 1 elemento apenas
+            pivot_index = yield from partition(arr, start, end) 
+            
+            yield from sort(arr, start, pivot_index - 1) # esquerda (menores)
+            yield from sort(arr, pivot_index + 1, end) # direita (maiores)
+            
+    yield from sort(arr, 0, len(arr)-1) 
+    # aqui, o 'yield from' retorna os yields que serao gerados em partition()
+    # ele serve para repassar os yields para quem chamou a funcao
