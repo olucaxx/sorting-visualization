@@ -83,6 +83,11 @@ class Render:
             
         self.last_changes.clear()
         
+        if event == "draw":
+            i, j = positions
+            self.__redraw_bar(i, arr[i], self.__default_color(arr[i]))
+            self.__clear_bar(j)
+        
         if event in EVENT_COLORS:
             for ev in positions:
                 self.__redraw_bar(ev, arr[ev], EVENT_COLORS[event])

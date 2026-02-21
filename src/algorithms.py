@@ -1,10 +1,20 @@
+import random
+
 '''
 cada altoritmo vai retornar apenas os indices que devem ser trocados no array
 
-por padrao, cade yield deve ser: "yield (<indices>,) <evento>"
+por padrao, cade yield deve ser: "yield (<indices>,) <evento>"  
     indices = um set com os indices que foram afetados 
-    evento = uma string com a operacao/evento: "swap" | "shift" | "compare" | "pivot" | "ordered"
+    evento = uma string com a operacao/evento: "swap" | "shift" | "compare" | "pivot" | "ordered" | "draw"
 '''
+
+def render_array(arr):
+    for i in range(len(arr)):
+        yield (i,i+1), "draw"
+        
+def shuffle(arr):
+    for i in range(len(arr) - 1, 0, -1):
+        yield (i, random.randint(0, i)), "swap"
 
 def bubble_sort(arr):
     arr = arr.copy() # criamos uma copia so para o algoritmo usar

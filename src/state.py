@@ -1,4 +1,3 @@
-import random
 
 class Array:
     def __init__(self, size):
@@ -8,11 +7,4 @@ class Array:
         if op == "swap" or op == "shift":
             i, j = pos
             self.values[i], self.values[j] = self.values[j], self.values[i]
-        
-    def shuffle(self):
-        '''
-        gera uma permutacao aleatoria, garante que todos os elementos tentem trocar de lugar
-        '''
-        for i in range(len(self.values) - 1, 0, -1): 
-            self.operate((i, random.randint(0, i)), "swap")
             
