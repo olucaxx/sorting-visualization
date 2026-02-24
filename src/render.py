@@ -14,7 +14,7 @@ EVENT_COLORS = {
     'pivot': (120,0,255), # roxo
 }
 
-class Render:
+class AlgorithmRender:
     def __init__(self, screen, scale, height):
         self.screen = screen 
         self.scale = scale 
@@ -66,11 +66,14 @@ class Render:
         self.__clear_bar(x)
         self.__draw_bar(x, value, color)
         
+    def fill_background(self):
+        self.screen.fill(BASE_COLORS['background'])
+        
     def draw_full(self, arr):
         '''
         desenha todo o array inicial
         '''
-        self.screen.fill(BASE_COLORS['background'])
+        self.fill_background()
         for x, v in enumerate(arr):
             self.__draw_bar(x, v, self.__default_color(v))
 
