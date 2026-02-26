@@ -2,6 +2,8 @@
 class SortingArray:
     def __init__(self, size: int):
         self.values = list(range(1, size + 1))
+        self.size = size
+        
         self.accesses = 0
         self.comparisons = 0
         self.swaps = 0

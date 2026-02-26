@@ -9,7 +9,6 @@ BASE_COLORS = {
 
 EVENT_COLORS = {    
     'swap': (255,0,0), # vermelho
-    'shift': (255,0,0), # vermelho
     'compare': (255,255,0), # amarelo
     'pivot': (120,0,255), # roxo
 }
@@ -87,9 +86,8 @@ class AlgorithmRender:
         self.last_changes.clear()
         
         if event == "draw":
-            i, j = positions
+            i = positions[0]
             self.__redraw_bar(i, arr[i], self.__default_color(arr[i]))
-            self.__clear_bar(j)
         
         if event in EVENT_COLORS:
             for ev in positions:

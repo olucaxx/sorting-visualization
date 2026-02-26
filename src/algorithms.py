@@ -1,6 +1,5 @@
 import random
 from state import SortingArray
-from typing import Generator
 
 '''
 cada altoritmo vai retornar apenas os indices que devem ser trocados no nosso renderizador
@@ -9,29 +8,26 @@ dentro dos algoritmos ele devera alterar as informacoes de acesso, comparacao e 
 
 por padrao, cade yield deve ser: "yield (<indices>,) <evento>"  
     indices = um set com os indices que foram afetados 
-    evento = uma string com a operacao/evento: "swap" | "shift" | "compare" | "pivot" | "ordered" | "draw"
+    evento = uma string com a operacao/evento: "swap" | "compare" | "pivot" | "draw"
 '''
 
-def render_array(array):
-    for i in range(len(array.values)):
-        yield (i,i+1), "draw"
+def render_array(array: SortingArray):
+    for i in range(array.size):
+        yield (i,), "draw"
         
 def shuffle(array: SortingArray):
-    for i in range(len(array.values) - 1, 0, -1):
+    for i in range(array.size - 1, 0, -1):
         j = random.randint(0, i)
         array.swap(i, j)
         yield (i, j), "swap"
 
-def bubble_sort(arr):
-    arr = arr.values.copy() # criamos uma copia so para o algoritmo usar
-    size = len(arr)
-
-    for i in range(size): # precisamos percorrer todo o array
+def bubble_sort(array: SortingArray):
+    for i in range(array.size): # precisamos percorrer todo o array
         swapped = False
 
-        for j in range(size-i-1): # para nao gerar indexError
-            if arr[j] > arr[j+1]: # se o numero da frente eh menor, troca com o atual
-                arr[j], arr[j+1] = arr[j+1], arr[j]
+        for j in range(array.size - i - 1): # para nao gerar indexError
+            if array.compare(array.get(j) > array.get(j+1)): # se o numero da frente eh menor, troca com o atual
+                array.swap(j, j+1)
                 swapped = True
                 yield (j, j+1), "swap"
 
@@ -39,47 +35,50 @@ def bubble_sort(arr):
             break
 
 
-def insertion_sort(arr):
-    arr = arr.values.copy() # criamos uma copia so para o algoritmo
-
-    for i in range(1,len(arr)): # comecamos no 1 pois assumimos que 0 esta ordenado
-        current = arr[i] # guardamos o valor do item que esta em i
+def insertion_sort(array: SortingArray):
+    for i in range(1, array.size): # comecamos no 1 pois assumimos que 0 esta ordenado
+        current = array.get(i) # guardamos o valor do item que esta em i
         j = i - 1 # uma casa antes
         
-        while current < arr[j] and j >= 0: # quebra se acharmos um numero menor que o atual
-            arr[j+1] = arr[j] # movemos o numero que comparamos uma casa para frente
-            yield (j+1, j), "shift"
+        while j >= 0: # limite 
+            j_value = array.get(j) # separamos do and para conseguir contabilizar apenas 1 acesso
+            comparison = array.compare(current < j_value) # nao vamos renderizar a comparacao, fica melhor assim
+            
+            if not comparison: # quebra se acharmos um numero menor que o atual
+                break
+            
+            array.set(j+1, array.get(j)) # movemos o numero que comparamos uma casa para frente
+            yield (j+1, j), "swap"
             j-=1 # vamos diminuindo ate achar um numero menor, ou chegarmos em -1
             
-        arr[j+1] = current # coloamos o atual na frente de onde achamos um numero menor que ele
+        array.set(j+1, current) # coloamos o atual na frente de onde achamos um numero menor que ele
 
 
-def selection_sort(arr):
-    arr = arr.values.copy()
-    size = len(arr)
-    
-    for i in range(size - 1): # vamos percorrer ate o penultimo, o ultimo fica ordenado
+def selection_sort(array: SortingArray):
+    for i in range(array.size - 1): # vamos percorrer ate o penultimo, o ultimo fica ordenado
         pivot = i # assumimos que o menor elemento eh o i
         
-        for j in range(i + 1, size): # vamos percorrer de i + 1 ate o fim
+        for j in range(i + 1, array.size): # vamos percorrer de i + 1 ate o fim
+            comparison = array.compare(array.get(j) < array.get(pivot) )
             yield (j, pivot), "compare"
-            if arr[j] < arr[pivot]: # se o valor de j for menor, temos um novo menor
+            if comparison: # se o valor de j for menor, temos um novo menor
                 pivot = j
                 
         if i != pivot: # verifica se o menor ja esta no lugar certo, ou seja, i
-            arr[i], arr[pivot] = arr[pivot], arr[i] # realizamos a troca
+            array.swap(i, pivot) # realizamos a troca
             yield (i, pivot), "swap"
 
 
-def quick_sort(array: SortingArray) -> Generator[tuple[tuple[int, ...], str], None, None]:
+def quick_sort(array: SortingArray):
     def partition(array, start, end):
         pivot = array.get(end) # ultimo elemento como pivo
         yield (end,), "pivot"
         i = start - 1 # temos que comecar sempre 1 atras
         
         for j in range(start, end):
+            comparison = array.compare(array.get(j) < pivot)
             yield (j, end), "compare"
-            if array.compare(array.get(j) < pivot): # trocamos caso seja menor
+            if comparison: # trocamos caso seja menor
                 i += 1
                 array.swap(i, j)
                 yield (i, j), "swap"
