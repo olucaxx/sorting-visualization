@@ -5,8 +5,7 @@ from enum import Enum
 # imports do projeto
 import algorithms
 from render import AlgorithmRender
-from state import Array
-from runner import AlgorithmRunner
+from state import SortingArray
 
 class VisualizerState(Enum):
     IDLE = 1
@@ -29,12 +28,12 @@ class Visualizer():
         self.timer = 0
         self.window_loop = True
         self.temp_step = 0
-        self.state = VisualizerState.IDLE
         
         # inicializacao de controladores
-        self.array = Array(self.size)
+        self.array = SortingArray(self.size)
         self.render = AlgorithmRender(self.screen, self.scale, self.size)
-        self.runner = AlgorithmRunner(algorithms.render_array(self.array.values))
+        self.runner = algorithms.render_array(self.array)
+        self.state = VisualizerState.RUNNING 
         
         # necessario pois o nosso fundo nao eh preto e fica estranho se nao renderizar antes
         self.render.fill_background()
@@ -60,23 +59,26 @@ class Visualizer():
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        self.runner = AlgorithmRunner(algorithms.shuffle(self.array.values))
+                        self.array.clear_stats()
+                        self.runner = algorithms.shuffle(self.array)
                         self.temp_step = self.step
                         self.step = 1 / (self.size * 2)
                         self.timer = 0
                         self.state = VisualizerState.RUNNING
                         
                     if event.key == pygame.K_KP_ENTER:
-                        self.runner = AlgorithmRunner(algorithms.quick_sort(self.array.values))
+                        self.array.clear_stats()
+                        self.runner = algorithms.quick_sort(self.array)
                         self.timer = 0
+                        self.state = VisualizerState.RUNNING
                         
                     if event.key == pygame.K_UP:
                         if self.size < 512: # o scale fica menor que 1 a partir disso
                             self.size = int(self.size * 2)
                             self.scale = int(self.scale / 2)  
-                            self.array = Array(self.size)
+                            self.array = SortingArray(self.size)
                             self.render = AlgorithmRender(self.screen, self.scale, self.size)
-                            self.runner = AlgorithmRunner(algorithms.render_array(self.array.values))
+                            self.runner = algorithms.render_array(self.array)
                             self.timer = 0
                             self.temp_step = self.step
                             self.step = 1 / (self.size * 3)
@@ -86,28 +88,28 @@ class Visualizer():
                         if self.size > 16: # minimo bom, menor que isso fica irrelevante'
                             self.size = int(self.size / 2)
                             self.scale = int(self.scale * 2)
-                            self.array = Array(self.size)
+                            self.array = SortingArray(self.size)
                             self.render = AlgorithmRender(self.screen, self.scale, self.size)
-                            self.runner = AlgorithmRunner(algorithms.render_array(self.array.values))
+                            self.runner = algorithms.render_array(self.array)
                             self.timer = 0
                             self.temp_step = self.step
                             self.step = 1 / (self.size * 3)
                             self.state = VisualizerState.RUNNING
+                            
+            if self.state == VisualizerState.RUNNING:
+                while self.timer >= self.step:
+                    try:
+                        position, event = next(self.runner) # retorn os indices e o evento que ele(s) se refere(m)
 
-            while self.timer >= self.step and not self.runner.finished:
-                result = self.runner.step()
+                        self.render.update_bars(self.array.values, position, event)
+                                    
+                    except StopIteration: # a funcao nao tem mais nenhum yield para retornar
+                        self.state = VisualizerState.IDLE
+                    
+                    self.timer -= self.step
 
-                if result is not None:
-                    position, event = result
-
-                    self.array.operate(position, event)
-                    self.render.update_bars(self.array.values, position, event)
-
-                self.timer -= self.step
-
-            if self.runner.finished:
-                self.render.update_bars(self.array.values, [], None)
-                self.state = VisualizerState.IDLE
+                if self.state == VisualizerState.IDLE:
+                    self.render.update_bars(self.array.values, [], None)
 
             pygame.display.flip()
 

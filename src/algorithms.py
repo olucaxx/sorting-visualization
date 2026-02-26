@@ -1,23 +1,29 @@
 import random
+from state import SortingArray
+from typing import Generator
 
 '''
-cada altoritmo vai retornar apenas os indices que devem ser trocados no array
+cada altoritmo vai retornar apenas os indices que devem ser trocados no nosso renderizador
+
+dentro dos algoritmos ele devera alterar as informacoes de acesso, comparacao e troca do obj SortingArray
 
 por padrao, cade yield deve ser: "yield (<indices>,) <evento>"  
     indices = um set com os indices que foram afetados 
     evento = uma string com a operacao/evento: "swap" | "shift" | "compare" | "pivot" | "ordered" | "draw"
 '''
 
-def render_array(arr):
-    for i in range(len(arr)):
+def render_array(array):
+    for i in range(len(array.values)):
         yield (i,i+1), "draw"
         
-def shuffle(arr):
-    for i in range(len(arr) - 1, 0, -1):
-        yield (i, random.randint(0, i)), "swap"
+def shuffle(array: SortingArray):
+    for i in range(len(array.values) - 1, 0, -1):
+        j = random.randint(0, i)
+        array.swap(i, j)
+        yield (i, j), "swap"
 
 def bubble_sort(arr):
-    arr = arr.copy() # criamos uma copia so para o algoritmo usar
+    arr = arr.values.copy() # criamos uma copia so para o algoritmo usar
     size = len(arr)
 
     for i in range(size): # precisamos percorrer todo o array
@@ -34,7 +40,7 @@ def bubble_sort(arr):
 
 
 def insertion_sort(arr):
-    arr = arr.copy() # criamos uma copia so para o algoritmo
+    arr = arr.values.copy() # criamos uma copia so para o algoritmo
 
     for i in range(1,len(arr)): # comecamos no 1 pois assumimos que 0 esta ordenado
         current = arr[i] # guardamos o valor do item que esta em i
@@ -49,7 +55,7 @@ def insertion_sort(arr):
 
 
 def selection_sort(arr):
-    arr = arr.copy()
+    arr = arr.values.copy()
     size = len(arr)
     
     for i in range(size - 1): # vamos percorrer ate o penultimo, o ultimo fica ordenado
@@ -65,34 +71,32 @@ def selection_sort(arr):
             yield (i, pivot), "swap"
 
 
-def quick_sort(arr):
-    arr = arr.copy()
-    
-    def partition(arr, start, end):
-        pivot = arr[end] # ultimo elemento como pivo
-        i = start - 1 # temos que comecar sempre 1 atras
+def quick_sort(array: SortingArray) -> Generator[tuple[tuple[int, ...], str], None, None]:
+    def partition(array, start, end):
+        pivot = array.get(end) # ultimo elemento como pivo
         yield (end,), "pivot"
+        i = start - 1 # temos que comecar sempre 1 atras
         
         for j in range(start, end):
             yield (j, end), "compare"
-            if arr[j] < pivot: # trocamos caso seja menor
+            if array.compare(array.get(j) < pivot): # trocamos caso seja menor
                 i += 1
-                arr[i], arr[j] = arr[j], arr[i]
+                array.swap(i, j)
                 yield (i, j), "swap"
                 
         # precisamos colocar o pivo na sua pos correta, que eh 1 na frente do i
-        arr[i + 1], arr[end] = arr[end], arr[i + 1]
+        array.swap(i + 1, end)
         yield (i + 1, end), "swap"
         
         return i + 1 # retornamos a pos do pivo
             
-    def sort(arr, start, end):
+    def sort(array, start, end):
         if start < end: # se for igual é False, ou seja, tem 1 elemento apenas
-            pivot_index = yield from partition(arr, start, end) 
+            pivot_index = yield from partition(array, start, end) 
             
-            yield from sort(arr, start, pivot_index - 1) # esquerda (menores)
-            yield from sort(arr, pivot_index + 1, end) # direita (maiores)
+            yield from sort(array, start, pivot_index - 1) # esquerda (menores)
+            yield from sort(array, pivot_index + 1, end) # direita (maiores)
             
-    yield from sort(arr, 0, len(arr)-1) 
+    yield from sort(array, 0, len(array.values)-1) 
     # aqui, o 'yield from' retorna os yields que serao gerados em partition()
     # ele serve para repassar os yields para quem chamou a funcao
