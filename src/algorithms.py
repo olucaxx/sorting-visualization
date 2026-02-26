@@ -18,7 +18,7 @@ def render_array(array: SortingArray):
 def shuffle(array: SortingArray):
     for i in range(array.size - 1, 0, -1):
         j = random.randint(0, i)
-        array.swap(i, j)
+        array.shuffle_swap(i, j)
         yield (i, j), "swap"
 
 def bubble_sort(array: SortingArray):

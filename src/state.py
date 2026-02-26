@@ -30,4 +30,7 @@ class SortingArray:
         temp = self.get(i)
         self.set(i, self.get(j))
         self.set(j, temp)
+        
+    def shuffle_swap(self, i: int, j: int) -> None:
+        self.values[i], self.values[j] = self.values[j], self.values[i]
             

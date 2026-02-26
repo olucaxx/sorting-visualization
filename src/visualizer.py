@@ -100,8 +100,8 @@ class Visualizer():
                 while self.timer >= self.step:
                     try:
                         position, event = next(self.runner) # retorn os indices e o evento que ele(s) se refere(m)
-
                         self.render.update_bars(self.array.values, position, event)
+                        print(self.array.accesses, self.array.comparisons, self.array.swaps)
                                     
                     except StopIteration: # a funcao nao tem mais nenhum yield para retornar
                         self.state = VisualizerState.IDLE
@@ -109,7 +109,7 @@ class Visualizer():
                     self.timer -= self.step
 
                 if self.state == VisualizerState.IDLE:
-                    self.render.update_bars(self.array.values, [], None)
+                    self.render.update_bars(self.array.values, [], None) # apenas para limpeza
 
             pygame.display.flip()
 
