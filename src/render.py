@@ -14,8 +14,9 @@ EVENT_COLORS = {
 }
 
 class AlgorithmRender:
-    def __init__(self, screen, scale, height):
-        self.screen = screen 
+    def __init__(self, screen, rect, scale, height):
+        self.screen = screen
+        self.rect = rect
         self.scale = scale 
         self.height = height 
         
@@ -40,21 +41,28 @@ class AlgorithmRender:
         pygame.draw.rect(
             self.screen,
             BASE_COLORS['background'],
-            (x*self.scale, 0, self.scale, self.height*self.scale)
+            (
+                self.rect.x + x * self.scale,
+                self.rect.y,
+                self.scale,
+                self.rect.height
+            )
         )
 
     def __draw_bar(self, x, value, color):
         '''
         desenha apenas uma barra branca na tela
         '''
+        bar_height = value * self.scale
+        
         pygame.draw.rect(
             self.screen,
             color,
             (
-                x * self.scale,
-                self.height * self.scale - value * self.scale,
+                self.rect.x + x * self.scale,
+                self.rect.y + self.rect.height - bar_height,
                 self.scale,
-                value * self.scale
+                bar_height
             )
         )
         
@@ -64,9 +72,6 @@ class AlgorithmRender:
         '''
         self.__clear_bar(x)
         self.__draw_bar(x, value, color)
-        
-    def fill_background(self):
-        self.screen.fill(BASE_COLORS['background'])
         
     def draw_full(self, arr):
         '''

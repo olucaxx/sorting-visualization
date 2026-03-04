@@ -5,10 +5,13 @@ from collections import deque
 
 # imports do projeto
 import algorithms as algorithms_module
-from render import AlgorithmRender
+from render import AlgorithmRender, BASE_COLORS
+from interface import UIRender
 from state import SortingArray
 
 MIN_SIZE, MIN_SCALE, MAX_SIZE, MAX_SCALE = 16, 32, 512, 1
+TOP_BAR_HEIGHT = 40
+BOTTOM_BAR_HEIGHT = 40
 
 class VisualizerState(Enum):
     IDLE = 1 # vai representar um estado parado
@@ -18,11 +21,38 @@ class VisualizerState(Enum):
 
 class Visualizer():
     def __init__(self):
+        self.width = MAX_SCALE * MAX_SIZE
+        self.height = MAX_SCALE * MAX_SIZE
+        self.total_height = self.height + TOP_BAR_HEIGHT + BOTTOM_BAR_HEIGHT
+        
         pygame.init()
         pygame.display.set_caption("sorting visualization")
-        self.screen = pygame.display.set_mode((MAX_SCALE * MAX_SIZE, MAX_SCALE * MAX_SIZE)) 
+        self.screen = pygame.display.set_mode((self.width, self.total_height)) 
         self.clock = pygame.time.Clock()
         self.window_loop = True 
+        
+        self.stats_rect = pygame.Rect(
+            0, 
+            0, 
+            self.width, 
+            TOP_BAR_HEIGHT
+        )
+        
+        self.bars_rect = pygame.Rect(
+            0, 
+            TOP_BAR_HEIGHT, 
+            self.width, 
+            self.height
+        )
+        
+        self.controls_rect = pygame.Rect(
+            0, 
+            self.height + TOP_BAR_HEIGHT, 
+            self.width, 
+            BOTTOM_BAR_HEIGHT
+        )
+        
+        self.user_interface = UIRender(self.screen, self.stats_rect, self.controls_rect)
         
         self.size = MIN_SIZE * 4
         self.scale = MIN_SCALE / 4
@@ -42,7 +72,10 @@ class Visualizer():
         self.algorithm_name = self.current_algorithm[0]
         
         self.reset_array()
-        self.render.fill_background()
+        self.screen.fill(BASE_COLORS['background'])
+        
+        self.user_interface.draw_stats(self.state, self.array)
+        self.user_interface.draw_controls(self.size, self.algorithm_name, self.speed)
         
     def change_algorithm(self, direction):
         if self.state != VisualizerState.IDLE:
@@ -51,7 +84,7 @@ class Visualizer():
         if direction in (-1, 1):
             self.algorithms.rotate(direction)
             self.current_algorithm = self.algorithms[0]
-            print(self.current_algorithm[0])
+            self.algorithm_name = self.current_algorithm[0]
         
     def render_array(self):
         self.runner = algorithms_module.render_array(self.array)
@@ -63,7 +96,11 @@ class Visualizer():
         self.state = VisualizerState.RENDERING
     
     def shuffle_array(self):
-        if self.state in (VisualizerState.RENDERING, VisualizerState.RUNNING):
+        if self.state == VisualizerState.RENDERING:
+            return
+        
+        if self.state == VisualizerState.RUNNING:
+            self.run_algorithm()
             return
         
         self.array.clear_stats()
@@ -77,7 +114,7 @@ class Visualizer():
     
     def reset_array(self):
         self.array = SortingArray(self.size)
-        self.render = AlgorithmRender(self.screen, self.scale, self.size)
+        self.render = AlgorithmRender(self.screen, self.bars_rect, self.scale, self.size)
         
         self.render_array()
         
@@ -91,7 +128,6 @@ class Visualizer():
         
         if self.state == VisualizerState.IDLE:
             self.runner = self.current_algorithm[1](self.array)
-            self.algorithm_name = self.current_algorithm[0]
             self.array.clear_stats()
         
         self.timer = 0 
@@ -163,11 +199,16 @@ class Visualizer():
                     if event.key == pygame.K_KP_MINUS:
                         self.decrease_speed()
                         
+                    self.user_interface.draw_stats(self.state, self.array)
+                    self.user_interface.draw_controls(self.size, self.algorithm_name, self.speed)
+                    
+                        
             if self.state != VisualizerState.IDLE and self.state != VisualizerState.PAUSED:
                 while self.timer >= self.step:
                     try:
                         position, event = next(self.runner) # retorn os indices e o evento que ele(s) se refere(m)
                         self.render.update_bars(self.array.values, position, event)
+                        self.user_interface.draw_stats(self.state, self.array)
                                     
                     except StopIteration: # a funcao nao tem mais nenhum yield para retornar
                         self.state = VisualizerState.IDLE
@@ -176,11 +217,12 @@ class Visualizer():
 
                 if self.state == VisualizerState.IDLE:
                     self.render.update_bars(self.array.values, [], None) # apenas para limpeza
+                    self.user_interface.draw_stats(self.state, self.array) # ultima atualizacao
                     
                     if self.last_step > 0: # caso tenhamos armazendo um step temporario, ex. renderizacao
                         self.step = self.last_step
                         self.last_step = 0
-
+                        
             pygame.display.flip()
 
         pygame.quit()
