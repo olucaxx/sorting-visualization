@@ -1,3 +1,10 @@
+from enum import Enum
+
+class VisualizerState(Enum):
+    IDLE = 1 # vai representar um estado parado
+    RUNNING = 2 # vai representar um estado de ordenacao, permitindo pausas, etc
+    RENDERING = 3 # vai representar um estado de renderizacao, que nao permite pausas, etc
+    PAUSED = 4 # vai permitir diferenciar de quando o algoritmo foi pausado ou finalizado
 
 class SortingArray:
     def __init__(self, size: int):

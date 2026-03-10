@@ -14,7 +14,7 @@ EVENT_COLORS = {
 }
 
 class AlgorithmRender:
-    def __init__(self, screen, rect, scale, height):
+    def __init__(self, screen: pygame.Surface, rect: pygame.Rect, scale: int, height: int):
         self.screen = screen
         self.rect = rect
         self.scale = scale 
@@ -22,7 +22,7 @@ class AlgorithmRender:
         
         self.last_changes = set() 
         
-    def __default_color(self, value):
+    def __default_color(self, value: int):
         t = (value-1)/(self.height-1)
 
         start = BASE_COLORS['start']
@@ -34,7 +34,7 @@ class AlgorithmRender:
 
         return (r,g,b)
     
-    def __clear_bar(self, x):
+    def __clear_bar(self, x: int):
         '''
         apaga uma barra da tela (pinta a coluna inteira de preto)
         '''
@@ -49,7 +49,7 @@ class AlgorithmRender:
             )
         )
 
-    def __draw_bar(self, x, value, color):
+    def __draw_bar(self, x: int, value: int, color: set[int, int, int]):
         '''
         desenha apenas uma barra branca na tela
         '''
@@ -66,14 +66,14 @@ class AlgorithmRender:
             )
         )
         
-    def __redraw_bar(self, x, value, color):
+    def __redraw_bar(self, x: int, value: int, color: set[int, int, int]):
         '''
         encapsula a atualizacao de barras: apagar + desenhar
         '''
         self.__clear_bar(x)
         self.__draw_bar(x, value, color)
         
-    def draw_full(self, arr):
+    def draw_full(self, arr: list[int]):
         '''
         desenha todo o array inicial
         '''
@@ -81,7 +81,7 @@ class AlgorithmRender:
         for x, v in enumerate(arr):
             self.__draw_bar(x, v, self.__default_color(v))
 
-    def update_bars(self, arr, positions, event):
+    def update_bars(self, arr: list[int], positions: set[int], event: str):
         '''
         logica para desenhar as operacoes realizadas no array
         '''

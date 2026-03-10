@@ -15,11 +15,13 @@ def render_array(array: SortingArray):
     for i in range(array.size):
         yield (i,), "draw"
         
+        
 def shuffle(array: SortingArray):
     for i in range(array.size - 1, 0, -1):
         j = random.randint(0, i)
         array.shuffle_swap(i, j)
         yield (i, j), "swap"
+
 
 def bubble_sort(array: SortingArray):
     for i in range(array.size): # precisamos percorrer todo o array
@@ -47,7 +49,7 @@ def insertion_sort(array: SortingArray):
             if not comparison: # quebra se acharmos um numero menor que o atual
                 break
             
-            array.set(j+1, array.get(j)) # movemos o numero que comparamos uma casa para frente
+            array.swap(j+1, j) # movemos o numero que comparamos uma casa para frente
             yield (j+1, j), "swap"
             j-=1 # vamos diminuindo ate achar um numero menor, ou chegarmos em -1
             
@@ -70,7 +72,7 @@ def selection_sort(array: SortingArray):
 
 
 def quick_sort(array: SortingArray):
-    def partition(array, start, end):
+    def partition(array: SortingArray, start: int, end: int):
         pivot = array.get(end) # ultimo elemento como pivo
         yield (end,), "pivot"
         i = start - 1 # temos que comecar sempre 1 atras
@@ -89,7 +91,7 @@ def quick_sort(array: SortingArray):
         
         return i + 1 # retornamos a pos do pivo
             
-    def sort(array, start, end):
+    def sort(array: SortingArray, start: int, end: int):
         if start < end: # se for igual é False, ou seja, tem 1 elemento apenas
             pivot_index = yield from partition(array, start, end) 
             

@@ -1,23 +1,16 @@
 # bibliotecas python
 import pygame, sys
-from enum import Enum
 from collections import deque
 
 # imports do projeto
 import algorithms as algorithms_module
 from render import AlgorithmRender, BASE_COLORS
 from interface import UIRender
-from state import SortingArray
+from state import SortingArray, VisualizerState
 
 MIN_SIZE, MIN_SCALE, MAX_SIZE, MAX_SCALE = 16, 32, 512, 1
 TOP_BAR_HEIGHT = 40
 BOTTOM_BAR_HEIGHT = 40
-
-class VisualizerState(Enum):
-    IDLE = 1 # vai representar um estado parado
-    RUNNING = 2 # vai representar um estado de ordenacao, permitindo pausas, etc
-    RENDERING = 3 # vai representar um estado de renderizacao, que nao permite pausas, etc
-    PAUSED = 4 # vai permitir diferenciar de quando o algoritmo foi pausado ou finalizado
 
 class Visualizer():
     def __init__(self):
@@ -77,7 +70,7 @@ class Visualizer():
         self.user_interface.draw_stats(self.state, self.array)
         self.user_interface.draw_controls(self.size, self.algorithm_name, self.speed)
         
-    def change_algorithm(self, direction):
+    def change_algorithm(self, direction: int):
         if self.state != VisualizerState.IDLE:
             return
     
